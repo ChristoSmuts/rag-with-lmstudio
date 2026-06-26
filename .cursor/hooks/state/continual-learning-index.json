@@ -1,0 +1,36 @@
+{
+  "transcripts": {
+    "C:\\Users\\mrcsm\\.cursor\\projects\\c-Web-Projects-rag-with-lmstudio\\agent-transcripts\\0a07fd64-d0c5-494e-9bc8-e172e6d99ac5\\0a07fd64-d0c5-494e-9bc8-e172e6d99ac5.jsonl": {
+      "mtimeMs": 1782479691013,
+      "processedAt": "2026-06-26T14:59:39.384Z"
+    },
+    "C:\\Users\\mrcsm\\.cursor\\projects\\c-Web-Projects-rag-with-lmstudio\\agent-transcripts\\42c2bb32-aee9-4b10-8451-da70c5ccb981\\42c2bb32-aee9-4b10-8451-da70c5ccb981.jsonl": {
+      "mtimeMs": 1782481006669,
+      "processedAt": "2026-06-26T14:59:39.384Z"
+    },
+    "C:\\Users\\mrcsm\\.cursor\\projects\\c-Web-Projects-rag-with-lmstudio\\agent-transcripts\\42c2bb32-aee9-4b10-8451-da70c5ccb981\\subagents\\0b173af4-73c7-48c2-b05b-bb7ea13ff131.jsonl": {
+      "mtimeMs": 1782473703094,
+      "processedAt": "2026-06-26T14:59:39.384Z"
+    },
+    "C:\\Users\\mrcsm\\.cursor\\projects\\c-Web-Projects-rag-with-lmstudio\\agent-transcripts\\42c2bb32-aee9-4b10-8451-da70c5ccb981\\subagents\\8864d1a7-3ff1-49e8-b765-03c66fca2523.jsonl": {
+      "mtimeMs": 1782477980172,
+      "processedAt": "2026-06-26T14:59:39.384Z"
+    },
+    "C:\\Users\\mrcsm\\.cursor\\projects\\c-Web-Projects-rag-with-lmstudio\\agent-transcripts\\9dd5365a-f7af-46a4-992e-4ac05acab5e9\\9dd5365a-f7af-46a4-992e-4ac05acab5e9.jsonl": {
+      "mtimeMs": 1782485882943,
+      "processedAt": "2026-06-26T14:59:39.384Z"
+    },
+    "C:\\Users\\mrcsm\\.cursor\\projects\\c-Web-Projects-rag-with-lmstudio\\agent-transcripts\\9dd5365a-f7af-46a4-992e-4ac05acab5e9\\subagents\\4cdf49a5-73f7-4202-b14b-4af1789a207e.jsonl": {
+      "mtimeMs": 1782481339002,
+      "processedAt": "2026-06-26T14:59:39.384Z"
+    },
+    "C:\\Users\\mrcsm\\.cursor\\projects\\c-Web-Projects-rag-with-lmstudio\\agent-transcripts\\9dd5365a-f7af-46a4-992e-4ac05acab5e9\\subagents\\ab1a4687-f283-4834-8afd-92a1bacb108f.jsonl": {
+      "mtimeMs": 1782485900358,
+      "processedAt": "2026-06-26T14:59:39.384Z"
+    },
+    "C:\\Users\\mrcsm\\.cursor\\projects\\c-Web-Projects-rag-with-lmstudio\\agent-transcripts\\9dd5365a-f7af-46a4-992e-4ac05acab5e9\\subagents\\fd86eef5-d963-483c-9cf1-11097dfa7fd6.jsonl": {
+      "mtimeMs": 1782481511225,
+      "processedAt": "2026-06-26T14:59:39.384Z"
+    }
+  }
+}

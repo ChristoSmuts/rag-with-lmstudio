@@ -1,0 +1,120 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --color-surface-950: #0a0c10;
+  --color-surface-900: #10141c;
+  --color-surface-800: #171d28;
+  --color-surface-700: #222a38;
+  --color-surface-600: #2f3a4d;
+  --color-accent-500: #3dd68c;
+  --color-accent-400: #5ee0a0;
+  --color-accent-300: #8aebb8;
+  --color-warn-500: #f5a524;
+  --color-danger-500: #f31260;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply bg-surface-950 text-zinc-100 antialiased;
+  font-family: var(--font-sans);
+  touch-action: manipulation;
+}
+
+@layer base {
+  a[href],
+  button:not(:disabled),
+  summary,
+  select:not(:disabled),
+  label[for],
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  select:disabled {
+    cursor: not-allowed;
+  }
+
+  a[href]:focus-visible,
+  button:focus-visible,
+  summary:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  input:focus-visible {
+    outline: 2px solid var(--color-accent-500);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-accent-500 focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-surface-950;
+  }
+
+  .btn-primary {
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center rounded-lg bg-accent-500 px-4 py-2 text-sm font-medium text-surface-950 transition-[color,background-color,transform,opacity] duration-200 ease-out hover:bg-accent-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100;
+    transition-timing-function: var(--ease-out-expo);
+  }
+
+  .btn-secondary {
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center rounded-lg border border-surface-600 px-4 py-2 text-sm text-zinc-200 transition-[color,background-color,transform,opacity] duration-200 ease-out hover:bg-surface-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100;
+    transition-timing-function: var(--ease-out-expo);
+  }
+
+  .btn-ghost {
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center rounded-lg px-3 py-2 text-sm text-zinc-300 transition-[color,background-color,transform,opacity] duration-200 ease-out hover:bg-surface-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100;
+    transition-timing-function: var(--ease-out-expo);
+  }
+
+  .btn-danger {
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center rounded-lg border border-danger-500/40 bg-danger-500/10 px-3 py-1.5 text-xs text-danger-500 transition-[color,background-color,transform,opacity] duration-200 ease-out hover:bg-danger-500/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100;
+    transition-timing-function: var(--ease-out-expo);
+  }
+
+  .btn-subtle {
+    @apply cursor-pointer text-xs text-zinc-500 transition-colors duration-200 ease-out hover:text-danger-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100;
+  }
+
+  .icon-btn {
+    @apply inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-lg text-zinc-400 transition-[color,background-color,transform,opacity] duration-200 ease-out hover:bg-surface-800 hover:text-zinc-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100;
+    transition-timing-function: var(--ease-out-expo);
+  }
+
+  .link-subtle {
+    @apply cursor-pointer text-sm text-zinc-400 transition-[color,transform] duration-200 ease-out hover:text-zinc-200 active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100;
+    transition-timing-function: var(--ease-out-expo);
+  }
+
+  .pressable {
+    @apply cursor-pointer transition-[color,background-color,border-color,transform,opacity] duration-200 ease-out active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100;
+    transition-timing-function: var(--ease-out-expo);
+  }
+
+  .field {
+    @apply w-full rounded-lg border border-surface-600 bg-surface-800 px-3 py-2 text-base sm:text-sm;
+  }
+
+  .panel-backdrop {
+    @apply fixed inset-0 z-30 cursor-pointer bg-black/50 lg:hidden;
+  }
+
+  .empty-state {
+    @apply rounded-xl border border-dashed border-surface-600 bg-surface-900/40 px-6 py-10 text-center;
+  }
+
+  .streaming-dot {
+    @apply inline-block h-2 w-2 animate-pulse rounded-full bg-accent-500 motion-reduce:animate-none;
+  }
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-surface-600) transparent;
+}
