@@ -54,6 +54,12 @@ function statusBadge(status: ProjectFile["index_status"]): StatusBadge {
         className: "border-surface-600 bg-surface-700/60 text-zinc-300",
         title: "Indexing in progress.",
       };
+    case "converting":
+      return {
+        label: "Converting…",
+        className: "border-surface-600 bg-surface-700/60 text-zinc-300",
+        title: "Converting to AI-readable text before indexing.",
+      };
     case "pending":
       return {
         label: "Pending",
@@ -212,7 +218,10 @@ export function ProjectWorkspace({ projectId }: ProjectWorkspaceProps) {
   // Poll while any file is still being indexed so status badges update live.
   useEffect(() => {
     const inFlight = files.some(
-      (f) => f.index_status === "pending" || f.index_status === "indexing",
+      (f) =>
+        f.index_status === "pending" ||
+        f.index_status === "converting" ||
+        f.index_status === "indexing",
     );
     if (!inFlight) return;
     const timer = setInterval(() => {
@@ -583,13 +592,15 @@ export function ProjectWorkspace({ projectId }: ProjectWorkspaceProps) {
                       className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-600 border-t-accent-400"
                     />
                   )}
-                  {uploading ? "Uploading…" : "Upload .md .csv .txt .json"}
+                  {uploading
+                    ? "Uploading…"
+                    : "Upload .md .csv .txt .json .pdf .docx .xlsx"}
                 </button>
                 <input
                   ref={fileInputRef}
                   type="file"
                   multiple
-                  accept=".md,.csv,.txt,.json,text/plain,text/csv,text/markdown,application/json"
+                  accept=".md,.csv,.txt,.json,.pdf,.docx,.xlsx,.xls,text/plain,text/csv,text/markdown,application/json,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
                   className="hidden"
                   onChange={(e) => void onUpload(e.target.files)}
                 />
@@ -630,6 +641,7 @@ export function ProjectWorkspace({ projectId }: ProjectWorkspaceProps) {
                       const badge = statusBadge(file.index_status);
                       const busy =
                         file.index_status === "pending" ||
+                        file.index_status === "converting" ||
                         file.index_status === "indexing";
                       return (
                         <li
@@ -706,7 +718,8 @@ export function ProjectWorkspace({ projectId }: ProjectWorkspaceProps) {
                       <li className="empty-state mx-2 my-4 p-4">
                         <p className="text-xs font-medium text-zinc-300">No files yet</p>
                         <p className="mt-1 text-xs leading-relaxed text-zinc-500">
-                          Upload markdown, CSV, text, or JSON to index for RAG.
+                          Upload markdown, CSV, text, JSON, PDF, Word, or Excel to index
+                          for RAG.
                         </p>
                       </li>
                     )}

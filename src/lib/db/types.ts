@@ -53,6 +53,7 @@ export interface Project {
 
 export type IndexStatus =
   | "pending"
+  | "converting"
   | "indexing"
   | "indexed"
   | "fts_only"
@@ -71,6 +72,10 @@ export interface ProjectFile {
   error_message: string | null;
   /** Embedding model used at index time (for staleness detection). */
   embedding_model: string | null;
+  /** On-disk path to the uploaded original when conversion was required. */
+  original_relative_path: string | null;
+  /** MIME type of the uploaded original (before conversion). */
+  source_mime: string | null;
 }
 
 export interface FileChunk {

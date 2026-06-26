@@ -12,9 +12,28 @@ export function projectFilesDir(projectId: string): string {
   return join(projectDir(projectId), "files");
 }
 
+/** Extensions the AI can read and index directly. */
 export const ALLOWED_EXTENSIONS = new Set([".md", ".csv", ".txt", ".json"]);
 
+/** Extensions converted to Markdown/text before indexing. */
+export const CONVERTIBLE_EXTENSIONS = new Set([
+  ".pdf",
+  ".docx",
+  ".xlsx",
+  ".xls",
+]);
+
+export function fileExtension(filename: string): string {
+  const dot = filename.lastIndexOf(".");
+  if (dot < 0) return "";
+  return filename.slice(dot).toLowerCase();
+}
+
+export function isConvertible(filename: string): boolean {
+  return CONVERTIBLE_EXTENSIONS.has(fileExtension(filename));
+}
+
 export function isAllowedFile(filename: string): boolean {
-  const ext = filename.slice(filename.lastIndexOf(".")).toLowerCase();
-  return ALLOWED_EXTENSIONS.has(ext);
+  const ext = fileExtension(filename);
+  return ALLOWED_EXTENSIONS.has(ext) || CONVERTIBLE_EXTENSIONS.has(ext);
 }

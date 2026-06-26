@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
+import * as XLSX from "xlsx";
 import {
   cleanupE2eViaApi,
   type SavedLmStudioSettings,
@@ -276,4 +277,57 @@ test("rolling summary updates after enough turns", async ({ page, request }) => 
 
   // Restore the default summary cadence so we don't leave altered settings.
   await request.put("/api/settings", { data: { summary_every_n_turns: 8 } });
+});
+
+test("Excel upload: converts and indexes for RAG", async ({ page }) => {
+  await createProjectAndOpen(page);
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([
+    ["Product", "Revenue"],
+    ["Widget", "BETA-99"],
+  ]);
+  XLSX.utils.book_append_sheet(wb, ws, "Sales");
+  const xlsxPath = join(tmpdir(), "rag-e2e-sample.xlsx");
+  await writeFile(
+    xlsxPath,
+    XLSX.write(wb, { type: "buffer", bookType: "xlsx" }) as Buffer,
+  );
+
+  await page.locator('input[type="file"]').setInputFiles(xlsxPath);
+  await expect(
+    page.getByRole("button", { name: /View rag-e2e-sample\.xlsx/ }),
+  ).toBeVisible({ timeout: 15_000 });
+
+  await expect(page.getByText("Keyword only").first()).toBeVisible({
+    timeout: 20_000,
+  });
+
+  await page.getByRole("button", { name: /View rag-e2e-sample\.xlsx/ }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByText(/Converted from Excel/i)).toBeVisible();
+  await expect(dialog.getByText(/BETA-99/)).toBeVisible({ timeout: 10_000 });
+  await page.getByRole("button", { name: "Close file viewer" }).click();
+});
+
+test("DOCX fixture upload: converts and shows extracted text", async ({ page }) => {
+  await createProjectAndOpen(page);
+
+  const docxPath = join(import.meta.dirname, "..", "fixtures", "sample.docx");
+  await page.locator('input[type="file"]').setInputFiles(docxPath);
+  await expect(
+    page.getByRole("button", { name: /View sample\.docx/ }),
+  ).toBeVisible({ timeout: 15_000 });
+
+  await expect(page.getByText("Keyword only").first()).toBeVisible({
+    timeout: 20_000,
+  });
+
+  await page.getByRole("button", { name: /View sample\.docx/ }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByText(/ALPHA-DOCX-SECRET/)).toBeVisible({
+    timeout: 10_000,
+  });
+  await page.getByRole("button", { name: "Close file viewer" }).click();
 });

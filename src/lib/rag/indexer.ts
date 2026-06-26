@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
   deleteChunksForFile,
@@ -11,24 +11,65 @@ import { ensureVecTable } from "../db/schema";
 import { projectFilesDir } from "../db/paths";
 import { embedTexts } from "../lmstudio/client";
 import { chunkFileContent } from "./chunker";
+import {
+  convertToText,
+  convertedRelativePath,
+} from "./convert";
 import type { ProjectFile } from "../db/types";
+
+async function ensureConvertedText(file: ProjectFile): Promise<ProjectFile> {
+  if (!file.original_relative_path) return file;
+
+  const filesDir = projectFilesDir(file.project_id);
+  const originalPath = join(filesDir, file.original_relative_path);
+  const buffer = await readFile(originalPath);
+
+  updateFileRecord(file.id, {
+    index_status: "converting",
+    error_message: null,
+  });
+
+  const { text } = await convertToText(file.filename, buffer);
+  const convertedPath = convertedRelativePath(file.filename);
+  const diskPath = join(filesDir, convertedPath);
+  await mkdir(join(filesDir, "converted"), { recursive: true });
+  await writeFile(diskPath, text, "utf8");
+
+  const convertedSize = Buffer.byteLength(text, "utf8");
+  updateFileRecord(file.id, {
+    relative_path: convertedPath,
+    mime: "text/markdown",
+    size: convertedSize,
+    index_status: "indexing",
+  });
+
+  return {
+    ...file,
+    relative_path: convertedPath,
+    mime: "text/markdown",
+    size: convertedSize,
+    index_status: "indexing",
+  };
+}
 
 export async function indexFile(file: ProjectFile): Promise<ProjectFile> {
   deleteChunksForFile(file.id);
 
-  const filePath = join(projectFilesDir(file.project_id), file.relative_path);
+  const ready = await ensureConvertedText(file);
+
+  const filePath = join(projectFilesDir(ready.project_id), ready.relative_path);
   const content = await readFile(filePath, "utf8");
-  const chunks = chunkFileContent(file.filename, content);
+  const chunks = chunkFileContent(ready.relative_path, content);
 
   const chunkIds: string[] = [];
   for (const [index, chunk] of chunks.entries()) {
     const chunkId = insertChunk(
-      file.id,
+      ready.id,
       index,
       chunk.content,
       chunk.startLine,
       chunk.endLine,
-      file.filename,
+      ready.filename,
     );
     chunkIds.push(chunkId);
   }
@@ -43,8 +84,6 @@ export async function indexFile(file: ProjectFile): Promise<ProjectFile> {
       const embeddings = await embedTexts(chunks.map((c) => c.content));
       const dimensions = embeddings[0]?.length ?? settings.embedding_dimensions;
 
-      // Idempotent: only rebuilds when the dimension actually changes, and never
-      // wipes other files' vectors (see ensureVecTable in schema.ts).
       ensureVecTable(dimensions);
 
       for (let i = 0; i < chunkIds.length; i++) {
@@ -65,7 +104,7 @@ export async function indexFile(file: ProjectFile): Promise<ProjectFile> {
   }
 
   const indexedAt = new Date().toISOString();
-  updateFileRecord(file.id, {
+  updateFileRecord(ready.id, {
     chunk_count: chunks.length,
     indexed_at: indexedAt,
     index_status: indexStatus,
@@ -74,7 +113,7 @@ export async function indexFile(file: ProjectFile): Promise<ProjectFile> {
   });
 
   return {
-    ...file,
+    ...ready,
     chunk_count: chunks.length,
     indexed_at: indexedAt,
     index_status: indexStatus,
@@ -89,7 +128,7 @@ export async function indexFile(file: ProjectFile): Promise<ProjectFile> {
  */
 export function queueIndexing(file: ProjectFile): void {
   updateFileRecord(file.id, {
-    index_status: "indexing",
+    index_status: file.original_relative_path ? "pending" : "indexing",
     error_message: null,
   });
 

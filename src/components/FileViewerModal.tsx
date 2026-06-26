@@ -18,6 +18,27 @@ function extentionOf(filename: string): string {
   return filename.slice(filename.lastIndexOf(".")).toLowerCase();
 }
 
+function sourceTypeLabel(filename: string, sourceMime: string | null): string {
+  const ext = extentionOf(filename);
+  if (sourceMime?.includes("pdf") || ext === ".pdf") return "PDF";
+  if (sourceMime?.includes("word") || ext === ".docx") return "Word";
+  if (
+    sourceMime?.includes("spreadsheet") ||
+    sourceMime?.includes("excel") ||
+    ext === ".xlsx" ||
+    ext === ".xls"
+  ) {
+    return "Excel";
+  }
+  return "document";
+}
+
+/** Extension used for viewer rendering (converted uploads are Markdown on disk). */
+function viewerExtension(file: FileContent): string {
+  if (file.original_relative_path) return ".md";
+  return extentionOf(file.filename);
+}
+
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -93,8 +114,12 @@ export function FileViewerModal({
       .then((file) => {
         if (cancelled) return;
         setData(file);
-        const ext = extentionOf(file.filename);
-        setMode(ext === ".md" || ext === ".json" || ext === ".csv" ? "rendered" : "raw");
+        const viewExt = viewerExtension(file);
+        setMode(
+          viewExt === ".md" || viewExt === ".json" || viewExt === ".csv"
+            ? "rendered"
+            : "raw",
+        );
       })
       .catch((err) => {
         if (cancelled) return;
@@ -136,7 +161,7 @@ export function FileViewerModal({
     return () => clearTimeout(timer);
   }, [data, mode]);
 
-  const ext = data ? extentionOf(data.filename) : "";
+  const ext = data ? viewerExtension(data) : "";
 
   const csvRows = useMemo(() => {
     if (!data || ext !== ".csv" || mode !== "rendered") return null;
@@ -177,9 +202,19 @@ export function FileViewerModal({
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = data.filename;
+    link.download = data.original_relative_path
+      ? `${data.filename}.md`
+      : data.filename;
     link.click();
     URL.revokeObjectURL(url);
+  }
+
+  function downloadOriginal() {
+    if (!data?.original_relative_path) return;
+    const link = document.createElement("a");
+    link.href = api.getOriginalFileDownloadUrl(projectId, data.id);
+    link.download = data.filename;
+    link.click();
   }
 
   function renderLinedText(text: string) {
@@ -311,6 +346,12 @@ export function FileViewerModal({
                 {data.truncated ? " · preview truncated" : ""}
               </p>
             )}
+            {data?.original_relative_path && (
+              <p className="mt-1 text-xs text-accent-300/90">
+                Converted from {sourceTypeLabel(data.filename, data.source_mime)} for AI
+                search — showing extracted text.
+              </p>
+            )}
           </div>
           <div className="flex shrink-0 items-center gap-1">
             {canToggle && data && (
@@ -336,8 +377,17 @@ export function FileViewerModal({
               disabled={!data}
               className="pressable rounded-md border border-surface-600 px-2 py-1 text-xs text-zinc-300 hover:bg-surface-800 disabled:opacity-50"
             >
-              Download
+              Download text
             </button>
+            {data?.original_relative_path && (
+              <button
+                type="button"
+                onClick={downloadOriginal}
+                className="pressable rounded-md border border-surface-600 px-2 py-1 text-xs text-zinc-300 hover:bg-surface-800"
+              >
+                Download original
+              </button>
+            )}
             <button
               type="button"
               onClick={onClose}

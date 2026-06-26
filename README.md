@@ -148,13 +148,11 @@ You should see a status like **LM Studio online** near the top.
 1. On the home screen, enter a project name and click **Create**.
 2. Open the project.
 3. In the **Files** panel, click **Upload** and add files:
-   - Markdown (`.md`)
-   - CSV (`.csv`)
-   - Plain text (`.txt`)
-   - JSON (`.json`)
-4. Wait until the file shows **Indexed** or **Keyword only** (indexing runs in the background).
+   - Markdown (`.md`), CSV (`.csv`), plain text (`.txt`), JSON (`.json`)
+   - PDF (`.pdf`), Word (`.docx`), Excel (`.xlsx`, `.xls`) — converted to text automatically before indexing
+4. Wait until the file shows **Indexed** or **Keyword only** (conversion and indexing run in the background).
 
-> **PDFs and Word docs:** This app does not read them directly. Convert them to text or Markdown first (e.g. with a separate converter tool), then upload.
+> **Note:** PDF/Word/Excel are converted locally by this app into AI-readable text. Scanned/image-only PDFs may not extract well.
 
 ### Start chatting
 

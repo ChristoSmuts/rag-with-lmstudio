@@ -131,6 +131,14 @@ export function guessMime(filename: string): string {
       return "application/json";
     case ".txt":
       return "text/plain";
+    case ".pdf":
+      return "application/pdf";
+    case ".docx":
+      return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    case ".xlsx":
+      return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    case ".xls":
+      return "application/vnd.ms-excel";
     default:
       return "application/octet-stream";
   }

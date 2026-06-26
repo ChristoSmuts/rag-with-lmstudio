@@ -65,6 +65,8 @@ export const api = {
   },
   getFile: (projectId: string, fileId: string) =>
     request<FileContent>(`/api/projects/${projectId}/files/${fileId}`),
+  getOriginalFileDownloadUrl: (projectId: string, fileId: string) =>
+    `/api/projects/${projectId}/files/${fileId}?download=original`,
   deleteFile: (projectId: string, fileId: string) =>
     request<void>(`/api/projects/${projectId}/files/${fileId}`, {
       method: "DELETE",

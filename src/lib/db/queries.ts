@@ -106,7 +106,8 @@ export function listFiles(projectId: string): ProjectFile[] {
   return getDb()
     .prepare(
       `SELECT id, project_id, filename, relative_path, mime, size, indexed_at,
-              chunk_count, index_status, error_message, embedding_model
+              chunk_count, index_status, error_message, embedding_model,
+              original_relative_path, source_mime
        FROM files WHERE project_id = ? ORDER BY filename ASC`,
     )
     .all(projectId) as ProjectFile[];
@@ -117,7 +118,8 @@ export function getFile(fileId: string): ProjectFile | null {
     (getDb()
       .prepare(
         `SELECT id, project_id, filename, relative_path, mime, size, indexed_at,
-                chunk_count, index_status, error_message, embedding_model
+                chunk_count, index_status, error_message, embedding_model,
+                original_relative_path, source_mime
          FROM files WHERE id = ?`,
       )
       .get(fileId) as ProjectFile | null) ?? null
@@ -151,6 +153,10 @@ export function createFileRecord(
   relativePath: string,
   mime: string,
   size: number,
+  options?: {
+    original_relative_path?: string | null;
+    source_mime?: string | null;
+  },
 ): ProjectFile {
   const file: ProjectFile = {
     id: nanoid(),
@@ -164,11 +170,14 @@ export function createFileRecord(
     index_status: "pending",
     error_message: null,
     embedding_model: null,
+    original_relative_path: options?.original_relative_path ?? null,
+    source_mime: options?.source_mime ?? null,
   };
   getDb()
     .prepare(
-      `INSERT INTO files (id, project_id, filename, relative_path, mime, size, index_status)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO files (id, project_id, filename, relative_path, mime, size, index_status,
+        original_relative_path, source_mime)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .run(
       file.id,
@@ -178,6 +187,8 @@ export function createFileRecord(
       file.mime,
       file.size,
       file.index_status,
+      file.original_relative_path,
+      file.source_mime,
     );
   return file;
 }
@@ -187,6 +198,9 @@ export function updateFileRecord(
   patch: Partial<
     Pick<
       ProjectFile,
+      | "relative_path"
+      | "mime"
+      | "size"
       | "chunk_count"
       | "indexed_at"
       | "index_status"
@@ -200,11 +214,14 @@ export function updateFileRecord(
   const next = { ...file, ...patch };
   getDb()
     .prepare(
-      `UPDATE files SET chunk_count = ?, indexed_at = ?, index_status = ?, error_message = ?,
-              embedding_model = ?
+      `UPDATE files SET relative_path = ?, mime = ?, size = ?, chunk_count = ?, indexed_at = ?,
+              index_status = ?, error_message = ?, embedding_model = ?
        WHERE id = ?`,
     )
     .run(
+      next.relative_path,
+      next.mime,
+      next.size,
       next.chunk_count,
       next.indexed_at,
       next.index_status,

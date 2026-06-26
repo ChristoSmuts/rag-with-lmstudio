@@ -86,6 +86,8 @@ const MIGRATIONS = [
 // is no migration-version runner.
 const COLUMN_MIGRATIONS: Array<{ table: string; column: string; ddl: string }> = [
   { table: "files", column: "embedding_model", ddl: "ALTER TABLE files ADD COLUMN embedding_model TEXT" },
+  { table: "files", column: "original_relative_path", ddl: "ALTER TABLE files ADD COLUMN original_relative_path TEXT" },
+  { table: "files", column: "source_mime", ddl: "ALTER TABLE files ADD COLUMN source_mime TEXT" },
   { table: "chats", column: "last_summarized_at", ddl: "ALTER TABLE chats ADD COLUMN last_summarized_at TEXT" },
   { table: "messages", column: "sources_json", ddl: "ALTER TABLE messages ADD COLUMN sources_json TEXT" },
   { table: "messages", column: "elapsed_ms", ddl: "ALTER TABLE messages ADD COLUMN elapsed_ms INTEGER" },

@@ -8,8 +8,11 @@ import {
 } from "../../../../../lib/db/queries";
 import {
   isAllowedFile,
+  isConvertible,
   projectFilesDir,
 } from "../../../../../lib/db/paths";
+import { guessMime } from "../../../../../lib/rag/chunker";
+import { originalRelativePath } from "../../../../../lib/rag/convert";
 import { queueIndexing } from "../../../../../lib/rag/indexer";
 
 export const GET: APIRoute = async ({ params }) => {
@@ -48,22 +51,37 @@ export const POST: APIRoute = async ({ params, request }) => {
     }
 
     const buffer = Buffer.from(await entry.arrayBuffer());
-    const relativePath = entry.name;
+    const convertible = isConvertible(entry.name);
+    const relativePath = convertible
+      ? originalRelativePath(entry.name)
+      : entry.name;
     const diskPath = join(filesDir, relativePath);
+
+    if (convertible) {
+      await mkdir(join(filesDir, "originals"), { recursive: true });
+    }
     await writeFile(diskPath, buffer);
 
+    const mime = entry.type || guessMime(entry.name);
     const record = createFileRecord(
       project.id,
       entry.name,
       relativePath,
-      entry.type || "text/plain",
+      mime,
       buffer.byteLength,
+      convertible
+        ? {
+            original_relative_path: relativePath,
+            source_mime: mime,
+          }
+        : undefined,
     );
 
-    // Index in the background so the upload returns immediately; the client
-    // polls file status to observe pending -> indexing -> indexed/fts_only/error.
     queueIndexing(record);
-    results.push({ ...record, index_status: "indexing" });
+    results.push({
+      ...record,
+      index_status: convertible ? "pending" : "indexing",
+    });
   }
 
   return new Response(JSON.stringify(results), {
